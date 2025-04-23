@@ -1,3 +1,6 @@
+// components/NavTabs.tsx
+
+import React, { ReactNode } from "react";
 import { FaClipboardList, FaPrescriptionBottleAlt, FaCamera } from "react-icons/fa";
 
 type Tab = "form" | "prescription" | "vision";
@@ -7,16 +10,16 @@ interface NavTabsProps {
   setTab: (t: Tab) => void;
 }
 
-const tabs: { id:Tab; label:string; icon: JSX.Element }[] = [
-  { id:"form", label:"Form Input", icon:<FaClipboardList/> },
-  { id:"prescription", label:"Prescription Image", icon:<FaPrescriptionBottleAlt/> },
-  { id:"vision", label:"Symptom Photo", icon:<FaCamera/> },
+const tabs: { id: Tab; label: string; icon: ReactNode }[] = [
+  { id: "form",         label: "Form Input",         icon: <FaClipboardList /> },
+  { id: "prescription", label: "Prescription Image", icon: <FaPrescriptionBottleAlt /> },
+  { id: "vision",       label: "Symptom Photo",      icon: <FaCamera /> },
 ];
 
-export const NavTabs = ({ currentTab, setTab }: NavTabsProps) => (
+export const NavTabs: React.FC<NavTabsProps> = ({ currentTab, setTab }) => (
   <nav className="bg-white shadow">
     <ul className="flex">
-      {tabs.map(t => (
+      {tabs.map((t) => (
         <li key={t.id} className="flex-1">
           <button
             onClick={() => setTab(t.id)}
