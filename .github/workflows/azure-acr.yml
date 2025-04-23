@@ -1,4 +1,5 @@
 # .github/workflows/azure-acr.yml
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Build & Push Healytics to ACR
 
 on:
@@ -9,15 +10,14 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      # 1) Check out your code
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      # 2) (Optional) enable Buildx if you ever need multi-arch, but plain docker works too
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
+      # Debug: show whether the registry secret is actually set
+      - name: Debug ACR secret
+        run: |
+          echo ">> registry: '${{ secrets.ACR_LOGIN_SERVER }}'"
+          echo ">> user:     '${{ secrets.ACR_USER }}'"
 
-      # 3) Log in to ACR
       - name: Log in to ACR
         uses: docker/login-action@v2
         with:
@@ -25,14 +25,10 @@ jobs:
           username: ${{ secrets.ACR_USER }}
           password: ${{ secrets.ACR_PASS }}
 
-      # 4) Build the image from the backend/ folder
       - name: Build Docker image
         run: |
-          docker build \
-            -t ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1 \
-            backend
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1 backend
 
-      # 5) Push the image to ACR
       - name: Push Docker image
         run: |
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1
