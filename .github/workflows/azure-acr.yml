@@ -10,10 +10,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      # 1) Checkout your code
       - uses: actions/checkout@v3
 
-      # 2) Log in to your ACR registry
       - name: Log in to ACR
         uses: docker/login-action@v2
         with:
@@ -21,10 +19,10 @@ jobs:
           username: ${{ secrets.ACR_USER }}
           password: ${{ secrets.ACR_PASS }}
 
-      # 3) Build & push using the GitHub-built buildx action
       - name: Build & push image
         uses: docker/build-push-action@v4
         with:
-          context: backend       # <- points to your backend/ folder
+          context: backend
           push: true
-          tags: ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1
+          tags:
+            - ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1
