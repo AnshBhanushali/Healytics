@@ -1,0 +1,12 @@
+/* styles/globals.css */
+
+/* Pull in Tailwind’s reset + base styles */
+@import "tailwindcss/preflight";
+
+/* Pull in all of Tailwind’s utility classes */
+@import "tailwindcss/utilities";
+
+body {
+  /* You can still @apply utilities */
+  @apply bg-gray-50 text-gray-800;
+}
