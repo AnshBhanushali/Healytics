@@ -1,19 +1,13 @@
-import logging
-import structlog
-from app.config import settings
+from pydantic import BaseSettings, Field
 
-def configure_logging():
-    logging.basicConfig(
-        format="%(message)s",
-        level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
-    )
-    structlog.configure(
-        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
-        processors=[
-            structlog.processors.add_log_level,
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.JSONRenderer(),
-        ],
-    )
+class Settings(BaseSettings):
+    MODEL_PATH: str = Field("app/model.joblib", env="MODEL_PATH")
+    LOG_LEVEL: str   = Field("INFO",                env="LOG_LEVEL")
+    HOST: str        = Field("0.0.0.0",              env="HOST")
+    PORT: int        = Field(8000,                   env="PORT")
 
-logger = structlog.get_logger()
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+settings = Settings()
