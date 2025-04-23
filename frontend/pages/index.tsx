@@ -1,36 +1,56 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { NavTabs } from "../components/NavTabs";
-import { FormInput } from "../components/FormInput";
+import FormInput from "../components/FormInput";
 import { PrescriptionInput } from "../components/PrescriptionInput";
 import { VisionInput } from "../components/VisionInput";
 import { RiskDashboard } from "../components/RiskDashboard";
-import { PredictionResponse } from "../types";
+import type { PredictionResponse } from "../types";
+import { motion } from "framer-motion";
 
 export default function Home() {
-  const [tab, setTab] = useState<"form"|"prescription"|"vision">("form");
-  const [result, setResult] = useState<PredictionResponse|null>(null);
+  const [tab, setTab] = useState<"form" | "prescription" | "vision">("form");
+  const [result, setResult] = useState<PredictionResponse | null>(null);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gray-50">
       <NavTabs currentTab={tab} setTab={setTab} />
 
-      <div className="flex flex-1 p-6 space-x-6">
-        <div className="w-1/2">
-          {tab === "form" && <FormInput onResult={setResult} />}
-          {tab === "prescription" && <PrescriptionInput onResult={setResult} />}
-          {tab === "vision" && <VisionInput onResult={setResult} />}
-        </div>
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        <motion.div
+          className="flex flex-col lg:flex-row gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Input Section */}
+          <motion.div
+            className="w-full lg:w-1/2 bg-white rounded-2xl shadow-lg p-6 border-4 border-gradient-to-r from-cyan-400 via-pink-400 to-purple-400"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            {tab === "form" && <FormInput onResult={setResult} />}
+            {tab === "prescription" && <PrescriptionInput onResult={setResult} />}
+            {tab === "vision" && <VisionInput onResult={setResult} />}
+          </motion.div>
 
-        <div className="w-1/2">
-          {result ? (
-            <RiskDashboard data={result} />
-          ) : (
-            <div className="p-4 text-gray-500 italic">
-              Submit data in the left panel to see results here.
-            </div>
-          )}
-        </div>
-      </div>
+          {/* Result Section */}
+          <motion.div
+            className="w-full lg:w-1/2 bg-white rounded-2xl shadow-lg p-6 border-4 border-gradient-to-r from-cyan-400 via-pink-400 to-purple-400"
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            {result ? (
+              <RiskDashboard data={result} />
+            ) : (
+              <div className="text-center text-gray-500 italic p-6">
+                Submit data in the left panel to see results here.
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      </main>
     </div>
   );
 }

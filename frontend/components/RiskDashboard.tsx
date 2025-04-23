@@ -1,50 +1,31 @@
 // components/RiskDashboard.tsx
-
-// Auto‐register all Chart.js scales, controllers, elements & plugins
-import "chart.js/auto";
-
+import "chart.js/auto"; // auto-register scales, controllers, elements & plugins
 import { Bar } from "react-chartjs-2";
-import { PredictionResponse } from "../types";
+import type { PredictionResponse } from "../types";
+import { motion } from "framer-motion";
 
 interface Props {
   data: PredictionResponse;
 }
 
 export const RiskDashboard = ({ data }: Props) => {
-  const {
-    confidence,
-    top_factors,
-    description,
-    recommended_actions,
-    urgency,
-    hospital_readmission,
-    readmission_probability,
-  } = data;
-
   return (
-    <div className="bg-white p-6 rounded shadow space-y-4">
-      <h2 className="text-xl font-bold">Risk Score: {confidence}</h2>
-      <div>
-        Category: <strong>{data.prediction.replace("_", " ")}</strong>
-      </div>
-      <div>
-        Urgency:{" "}
-        <span
-          className={`font-semibold ${
-            urgency === "high"
-              ? "text-red-600"
-              : urgency === "medium"
-              ? "text-yellow-600"
-              : "text-green-600"
-          }`}
-        >
-          {urgency}
-        </span>
+    <motion.div
+      className="bg-white rounded-xl shadow-lg p-6 space-y-6"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <h2 className="text-2xl font-semibold text-primary">
+        Risk Score: {data.confidence}
+      </h2>
+      <div className="text-sm uppercase text-secondary font-semibold">
+        Category: {data.prediction.replace("_", " ")}
       </div>
 
       <Bar
         data={{
-          labels: top_factors,
+          labels: data.top_factors,
           datasets: [{ label: "Factors", data: [1, 1] }],
         }}
         options={{
@@ -53,26 +34,22 @@ export const RiskDashboard = ({ data }: Props) => {
         }}
       />
 
-      <p>{description}</p>
+      <p className="italic text-gray-600">{data.description}</p>
 
       <div>
         <h3 className="font-semibold">Recommendations</h3>
-        <ul className="list-disc list-inside">
-          {recommended_actions.map((a, i) => (
+        <ul className="list-disc list-inside text-gray-700">
+          {data.recommended_actions.map((a, i) => (
             <li key={i}>{a}</li>
           ))}
         </ul>
       </div>
 
-      <div>
-        <h3 className="font-semibold">Readmission</h3>
-        <p>
-          {hospital_readmission
-            ? "Consider readmission"
-            : "No readmission needed"}
-        </p>
-        <p>Probability: {readmission_probability}</p>
+      <div className="text-sm text-gray-600">
+        <strong>Readmission:</strong>{" "}
+        {data.hospital_readmission ? "Consider" : "Not needed"} (prob{" "}
+        {data.readmission_probability})
       </div>
-    </div>
+    </motion.div>
   );
 };
