@@ -59,3 +59,17 @@ def predict_text_image(file_bytes: bytes) -> PredictionResponse:
     return PredictionResponse(
         mode="text-image", prediction=pred, confidence=confidence, top_factors=factors
     )
+
+def predict_vision(file_bytes: bytes) -> PredictionResponse:
+    # Decode into OpenCV image
+    arr = np.frombuffer(file_bytes, dtype=np.uint8)
+    img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+    # Measure "redness"
+    red_mean = img[:,:,2].mean()
+    high_risk = red_mean > 100
+    pred = "high_risk" if high_risk else "low_risk"
+    confidence = 0.85 if high_risk else 0.4
+    factors = ["high_redness"] if high_risk else ["normal_color"]
+    return PredictionResponse(
+        mode="vision", prediction=pred, confidence=confidence, top_factors=factors
+    )
