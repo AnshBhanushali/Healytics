@@ -52,3 +52,24 @@ models = {
 best_auc = 0
 best_name = None
 best_pipeline = None
+
+# Train and Evaluate the models
+for name, clf in models.items():
+    pipe = Pipeline([
+        ("prep", preprocessor),
+        ("clf", clf),
+    ])
+    pipe.fit(X_train, y_train)
+    preds = pipe.predict_proba(X_val)[:,1]
+    auc = roc_auc_score(y_val, preds)
+    f1 = f1_score(y_val, pipe.predict(X_val))
+    print(f"{name}: AUC={auc:.3f}, F1={f1:.3f}")
+    if auc > best_auc:
+        best_auc = auc
+        best_name = name
+        best_pipeline = pipe
+
+print(f"→ Best model: {best_name} with AUC={best_auc:.3f}")
+
+joblib.dump(best_pipeline, "app/model.joblib")
+print("Saved pipeline to app/model.joblib")
