@@ -2,17 +2,22 @@ import { useState } from "react";
 import axios from "../utils/api";
 import { FormInput as FI, PredictionResponse } from "../types";
 
-interface Props { onResult: (r: PredictionResponse) => void; }
+interface Props {
+  onResult: (r: PredictionResponse) => void;
+}
 
 export const FormInput = ({ onResult }: Props) => {
   const [form, setForm] = useState<FI>({
-    age: 0, systolic_bp: 0, diastolic_bp: 0,
-    cholesterol: 0, family_history: false,
+    age: 0,
+    systolic_bp: 120,
+    diastolic_bp: 80,
+    cholesterol: 180,
+    family_history: false,
   });
 
   const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setForm(f => ({
+    setForm((f) => ({
       ...f,
       [name]: type === "checkbox" ? checked : Number(value),
     }));
@@ -20,15 +25,16 @@ export const FormInput = ({ onResult }: Props) => {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting form:", form);
     const { data } = await axios.post<PredictionResponse>("/predict/form", form);
     onResult(data);
   };
 
   return (
     <form onSubmit={submit} className="bg-white p-6 rounded shadow space-y-4">
-      {["age","systolic_bp","diastolic_bp","cholesterol"].map(field => (
+      {["age", "systolic_bp", "diastolic_bp", "cholesterol"].map((field) => (
         <div key={field}>
-          <label className="block capitalize">{field.replace(/_/g," ")}</label>
+          <label className="block capitalize">{field.replace(/_/g, " ")}</label>
           <input
             type="number"
             name={field}
@@ -40,8 +46,10 @@ export const FormInput = ({ onResult }: Props) => {
       ))}
       <div className="flex items-center">
         <input
-          type="checkbox" name="family_history"
-          checked={form.family_history} onChange={handle}
+          type="checkbox"
+          name="family_history"
+          checked={form.family_history}
+          onChange={handle}
           className="mr-2"
         />
         <label>Family History</label>

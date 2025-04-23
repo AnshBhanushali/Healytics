@@ -1,11 +1,12 @@
 # app/main.py
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .logging_conf import configure_logging, logger
-from .routers.form       import router as form_router
+from .routers.form import router as form_router
 from .routers.text_image import router as text_image_router
-from .routers.vision     import router as vision_router
+from .routers.vision import router as vision_router
 
 def create_app() -> FastAPI:
     configure_logging()
@@ -14,8 +15,19 @@ def create_app() -> FastAPI:
         version="0.2.0",
         description="Health risk API with form, text-image, and vision"
     )
-    for r in (form_router, text_image_router, vision_router):
-        app.include_router(r)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[ "http://localhost:3000" ], 
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # Include all prediction routes
+    for router in (form_router, text_image_router, vision_router):
+        app.include_router(router)
+
     return app
 
 app = create_app()
