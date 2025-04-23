@@ -18,3 +18,20 @@ FEATURE_COLS = [
 ]
 LABEL_COL = "Outcome Variable"
 
+X = df[FEATURE_COLS]
+y = df[LABEL_COL].map({"Negative": 0, "Positive": 1})
+
+# Split data for testing and training
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Preprocessing pipelines
+numeric_features = ["Age"]
+numeric_transformer = StandardScaler()
+
+categorical_features = [
+    "Fever", "Cough", "Fatigue", "Difficulty Breathing",
+    "Gender", "Blood Pressure", "Cholesterol Level"
+]
+categorical_transformer = OneHotEncoder(handle_unknown="ignore")
