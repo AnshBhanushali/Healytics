@@ -1,9 +1,9 @@
 // components/NavTabs.tsx
 
 import React, { ReactNode } from "react";
-import { FaClipboardList, FaPrescriptionBottleAlt, FaCamera } from "react-icons/fa";
+import { FaClipboardList, FaPrescriptionBottleAlt, FaCamera, FaHeartbeat } from "react-icons/fa";
 
-type Tab = "form" | "prescription" | "vision";
+export type Tab = "form" | "prescription" | "vision";
 
 interface NavTabsProps {
   currentTab: Tab;
@@ -16,24 +16,35 @@ const tabs: { id: Tab; label: string; icon: ReactNode }[] = [
   { id: "vision",       label: "Symptom Photo",      icon: <FaCamera /> },
 ];
 
-export const NavTabs: React.FC<NavTabsProps> = ({ currentTab, setTab }) => (
-  <nav className="bg-white shadow">
-    <ul className="flex">
-      {tabs.map((t) => (
-        <li key={t.id} className="flex-1">
-          <button
-            onClick={() => setTab(t.id)}
-            className={`w-full p-4 flex items-center justify-center space-x-2 ${
-              currentTab === t.id
-                ? "bg-blue-600 text-white"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            {t.icon}
-            <span>{t.label}</span>
-          </button>
-        </li>
-      ))}
-    </ul>
-  </nav>
-);
+export function NavTabs({ currentTab, setTab }: NavTabsProps) {
+  return (
+    <nav className="bg-primary py-4">
+      <div className="max-w-4xl mx-auto flex items-center justify-between px-6">
+        {/* Logo & Brand */}
+        <div className="flex items-center space-x-2">
+          <FaHeartbeat className="text-white text-3xl" />
+          <span className="text-white text-2xl font-bold">Healytics</span>
+        </div>
+
+        {/* Navigation Pills */}
+        <ul className="flex space-x-4">
+          {tabs.map(({ id, label, icon }) => (
+            <li key={id}>
+              <button
+                onClick={() => setTab(id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 ${
+                  currentTab === id
+                    ? "bg-white text-primary shadow-lg"
+                    : "text-white hover:bg-white/[0.2]"
+                }`}
+              >
+                {icon}
+                <span>{label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
+  );
+}
