@@ -10,13 +10,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      # Debug: show whether the registry secret is actually set
-      - name: Debug ACR secret
-        run: |
-          echo ">> registry: '${{ secrets.ACR_LOGIN_SERVER }}'"
-          echo ">> user:     '${{ secrets.ACR_USER }}'"
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Log in to ACR
         uses: docker/login-action@v2
@@ -25,10 +20,8 @@ jobs:
           username: ${{ secrets.ACR_USER }}
           password: ${{ secrets.ACR_PASS }}
 
-      - name: Build Docker image
+      - name: Build & push Docker image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1 backend
-
-      - name: Push Docker image
-        run: |
+          # Build from the ./backend folder
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1 ./backend
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1
