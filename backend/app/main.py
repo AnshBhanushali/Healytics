@@ -35,3 +35,20 @@ categorical_features = [
     "Gender", "Blood Pressure", "Cholesterol Level"
 ]
 categorical_transformer = OneHotEncoder(handle_unknown="ignore")
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("num", numeric_transformer, numeric_features),
+        ("cat", categorical_transformer, categorical_features),
+    ]
+)
+
+# Candidate for model training
+models = {
+    "logreg": LogisticRegression(max_iter=1000, random_state=42),
+    "xgb":    XGBClassifier(use_label_encoder=False, eval_metric="logloss", random_state=42),
+}
+
+best_auc = 0
+best_name = None
+best_pipeline = None
