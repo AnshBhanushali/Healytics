@@ -18,7 +18,6 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-4">
-      <NavTabs currentTab={tab} setTab={handleTab} />
 
       <AnimatePresence mode="wait">
         <motion.div

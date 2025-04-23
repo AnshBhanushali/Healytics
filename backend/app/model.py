@@ -83,21 +83,80 @@ def predict_text_image(file_bytes: bytes) -> PredictionResponse:
     )
 
 
+import cv2
+import numpy as np
+from typing import List
+
 def predict_vision(file_bytes: bytes) -> PredictionResponse:
+    # decode
     arr = np.frombuffer(file_bytes, dtype=np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-    red_mean = img[:, :, 2].mean()
-    high_risk = red_mean > 100
+
+    # channel means
+    blue_mean, green_mean, red_mean = cv2.mean(img)[:3]
+
+    # brightness (mean of grayscale)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    brightness = gray.mean()
+
+    # sharpness (variance of Laplacian)
+    sharpness = cv2.Laplacian(gray, cv2.CV_64F).var()
+
+    # edge density (Canny / total pixels)
+    edges = cv2.Canny(gray, 50, 150)
+    edge_density = edges.sum() / edges.size
+
+    # risk decision (you can tweak thresholds)
+    high_risk = red_mean > 100 or edge_density > 0.05
+
+    # base prediction/confidence
     pred = "high_risk" if high_risk else "low_risk"
     confidence = 0.85 if high_risk else 0.4
-    factors = ["high_redness"] if high_risk else ["normal_color"]
+
+    # build a richer factors list
+    factors: List[str] = []
+    # redness factor
+    if red_mean > 120:
+        factors.append("very_high_redness")
+    elif red_mean > 100:
+        factors.append("high_redness")
+    else:
+        factors.append("normal_redness")
+
+    # color balance
+    if red_mean > green_mean + 20:
+        factors.append("red_dominant")
+    elif green_mean > red_mean + 20:
+        factors.append("green_dominant")
+    else:
+        factors.append("balanced_color")
+
+    # brightness
+    if brightness < 50:
+        factors.append("underexposed")
+    elif brightness > 200:
+        factors.append("overexposed")
+    else:
+        factors.append("normal_brightness")
+
+    # sharpness
+    if sharpness < 100:
+        factors.append("blurry_image")
+    else:
+        factors.append("sharp_image")
+
+    # edge density
+    if edge_density > 0.05:
+        factors.append("high_edge_activity")
+    else:
+        factors.append("low_edge_activity")
 
     return PredictionResponse(
         mode="vision",
         prediction=pred,
         confidence=confidence,
         top_factors=factors,
-        description="Vision analysis based on redness intensity.",
+        description="Vision analysis based on redness, brightness, sharpness, and edge density.",
         recommended_actions=["Seek emergency care" if high_risk else "No action needed"],
         urgency="high" if high_risk else "low",
         hospital_readmission=high_risk,
