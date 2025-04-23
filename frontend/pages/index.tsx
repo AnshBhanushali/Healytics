@@ -45,7 +45,7 @@ export default function Home() {
               <RiskDashboard data={result} />
             ) : (
               <div className="text-center text-gray-500 italic p-6">
-                Submit data in the left panel to see results here.
+                Submit data in the panel below to see results here.
               </div>
             )}
           </motion.div>
