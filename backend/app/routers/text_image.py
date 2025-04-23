@@ -1,21 +1,16 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
-from .__init__ import router 
 from app.model import predict_text_image
+from app.schemas import PredictionResponse
 from app.logging_conf import logger
 
 router = APIRouter(prefix="/predict", tags=["predict"])
 
 @router.post(
     "/text-image",
-    response_model=None, 
-    response_model_exclude_none=True
+    response_model=PredictionResponse,
+    summary="Predict health risk from prescription/report image"
 )
-
 async def text_image_endpoint(file: UploadFile = File(...)):
-    """
-    Accepts an uploaded image of a doctor’s note/prescription,
-    runs OCR+NLP, and returns a PredictionResponse.
-    """
     logger.info("Received text-image file", filename=file.filename)
     try:
         contents = await file.read()
