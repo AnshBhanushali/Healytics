@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Build & Push Healytics to ACR
 
 on:
@@ -19,7 +20,8 @@ jobs:
 
       - name: Build & push image
         run: |
-          docker build -f backend/Dockerfile \
+          # build using the backend/ folder as context
+          docker build \
             -t ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1 \
             backend/
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/healytics-backend:v1
