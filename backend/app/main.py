@@ -4,9 +4,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .logging_conf import configure_logging, logger
-from .routers.form import router as form_router
+from .routers.form       import router as form_router
 from .routers.text_image import router as text_image_router
-from .routers.vision import router as vision_router
+from .routers.vision     import router as vision_router
 
 def create_app() -> FastAPI:
     configure_logging()
@@ -16,6 +16,7 @@ def create_app() -> FastAPI:
         description="Health risk API with form, text-image, and vision"
     )
 
+    # allow requests from your React frontend
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[ "http://localhost:3000" ], 
@@ -24,7 +25,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Include all prediction routes
+    # register all prediction routes
     for router in (form_router, text_image_router, vision_router):
         app.include_router(router)
 

@@ -3,7 +3,7 @@ import api from "../utils/api";
 import type { PredictionResponse } from "../types";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { FaExclamationCircle, FaUserAlt, FaHeartbeat, FaTint } from "react-icons/fa";
+import { FaExclamationCircle, FaUserAlt, FaHeartbeat, FaTint, FaFish } from "react-icons/fa";
 
 interface Props {
   onResult: (r: PredictionResponse) => void;
@@ -29,7 +29,7 @@ export default function FormInput({ onResult }: Props) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
@@ -38,110 +38,162 @@ export default function FormInput({ onResult }: Props) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!form.age || !form.systolic_bp || !form.diastolic_bp || !form.cholesterol) {
-      setError("All fields are required.");
+    const { age, systolic_bp, diastolic_bp, cholesterol } = form;
+
+    if (!age || !systolic_bp || !diastolic_bp || !cholesterol) {
+      setError("Please complete all fields.");
       return;
     }
+
     const payload = {
-      age: Number(form.age),
-      systolic_bp: Number(form.systolic_bp),
-      diastolic_bp: Number(form.diastolic_bp),
-      cholesterol: Number(form.cholesterol),
+      age: Number(age),
+      systolic_bp: Number(systolic_bp),
+      diastolic_bp: Number(diastolic_bp),
+      cholesterol: Number(cholesterol),
       family_history: form.family_history,
     };
+
     try {
       const { data } = await api.post<PredictionResponse>("/predict/form", payload);
       onResult(data);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 422) {
-        setError("Server validation failed. Please check your inputs.");
+        const detail = (err.response.data as any).detail;
+        const msg =
+          Array.isArray(detail) && detail.length
+            ? `${detail[0].loc.slice(-1)[0]}: ${detail[0].msg}`
+            : "Invalid input.";
+        setError(msg);
       } else {
-        setError("Unexpected error. Try again.");
+        setError("Unexpected error. Please try again.");
       }
     }
   };
 
+  // Define fields with their valid ranges
+  const fields = [
+    { name: "age", label: "Age", icon: <FaUserAlt className="text-teal-500" />, min: 0, max: 120 },
+    { name: "systolic_bp", label: "Systolic BP", icon: <FaHeartbeat className="text-teal-500" />, min: 50, max: 250 },
+    { name: "diastolic_bp", label: "Diastolic BP", icon: <FaHeartbeat className="text-blue-500" />, min: 30, max: 150 },
+    { name: "cholesterol", label: "Cholesterol", icon: <FaTint className="text-blue-500" />, min: 50, max: 400 },
+  ];
+
+  // Bubble animation variants
+  const bubbleVariants = {
+    initial: { y: "100%", opacity: 0.3 },
+    animate: {
+      y: "-100%",
+      opacity: 0.8,
+      transition: {
+        duration: Math.random() * 5 + 5,
+        repeat: Infinity,
+        repeatType: "loop" as const,
+        ease: "linear",
+      },
+    },
+  };
+
   return (
-    <motion.div
-      className="bg-gradient-to-r from-pink-200 via-yellow-100 to-cyan-200 p-4 rounded-3xl max-w-lg mx-auto shadow-2xl border-4 border-purple-400"
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, type: "spring", bounce: 0.4 }}
+    <motion.form
+      onSubmit={submit}
+      className="relative bg-gradient-to-br from-teal-100/80 to-blue-100/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 space-y-6 border-4 border-gradient-to-r from-teal-400 to-blue-400 max-w-2xl mx-auto overflow-hidden"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      aria-label="Health Prediction Form"
     >
-      <form
-        onSubmit={submit}
-        className="bg-white rounded-2xl p-8 space-y-6 shadow-lg"
-        aria-label="Health Prediction Form"
+      {/* Bubble Decorations */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full bg-white/40 shadow-md"
+          style={{
+            width: Math.random() * 25 + 15,
+            height: Math.random() * 25 + 15,
+            left: `${Math.random() * 100}%`,
+          }}
+          variants={bubbleVariants}
+          initial="initial"
+          animate="animate"
+        />
+      ))}
+
+      {/* Fish Decoration */}
+      <motion.div
+        className="absolute top-4 right-4 text-teal-500"
+        initial={{ x: 20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 1, delay: 0.5, repeat: Infinity, repeatType: "reverse" }}
       >
-        <h2 className="text-3xl font-extrabold text-purple-600 flex items-center gap-3">
-          <FaHeartbeat className="text-red-500 animate-pulse" />
-          Health Check Vibes
-        </h2>
+        <FaFish className="text-3xl" />
+      </motion.div>
 
-        {error && (
-          <motion.div
-            className="flex items-center gap-2 bg-red-500 text-white p-4 rounded-lg shadow-md border-2 border-red-700"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, type: "spring" }}
-            role="alert"
-          >
-            <FaExclamationCircle className="text-xl" />
-            <span className="font-semibold">{error}</span>
-          </motion.div>
-        )}
+      <h2 className="text-4xl font-extrabold text-teal-800 flex items-center gap-3 relative z-10">
+        <FaFish className="text-teal-500 animate-bounce" />
+        Health Check Waves 🌊
+      </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {[
-            { name: "age", label: "Age", placeholder: "e.g. 30", icon: <FaUserAlt className="text-blue-500" /> },
-            { name: "cholesterol", label: "Cholesterol", placeholder: "e.g. 180", icon: <FaTint className="text-green-500" /> },
-            { name: "systolic_bp", label: "Systolic BP", placeholder: "e.g. 120", icon: <FaTint className="text-pink-500" /> },
-            { name: "diastolic_bp", label: "Diastolic BP", placeholder: "e.g. 80", icon: <FaTint className="text-yellow-500" /> },
-          ].map(({ name, label, placeholder, icon }) => (
-            <div key={name} className="flex flex-col">
-              <label className="flex items-center gap-2 text-lg font-bold text-purple-700 mb-2">
-                {icon}
-                {label}
-              </label>
-              <motion.input
-                type="number"
-                name={name}
-                value={(form as any)[name]}
-                onChange={handleChange}
-                placeholder={placeholder}
-                className="w-full p-3 border-2 border-purple-300 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:border-purple-500 transition-all duration-300 text-gray-800 placeholder-gray-500"
-                aria-label={label}
-                whileFocus={{ scale: 1.02 }}
-              />
-            </div>
-          ))}
-        </div>
+      {error && (
+        <motion.div
+          className="flex items-center gap-2 text-red-700 bg-red-100 p-4 rounded-lg border-2 border-red-300 relative z-10 shadow-md"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, type: "spring" }}
+          role="alert"
+        >
+          <FaExclamationCircle className="text-xl" />
+          <span className="font-semibold">{error}</span>
+        </motion.div>
+      )}
 
-        <div className="flex items-center gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+        {fields.map(({ name, label, icon, min, max }) => (
+          <div key={name}>
+            <label className="flex items-center mb-2 text-teal-700 font-bold text-lg">
+              {icon}
+              <span className="ml-2">{label}</span>
+            </label>
+            <motion.input
+              type="number"
+              name={name}
+              placeholder={`${min} – ${max}`}
+              min={min}
+              max={max}
+              value={form[name as keyof FormState] as string}
+              onChange={handleChange}
+              className="w-full p-4 border-2 border-gradient-to-r from-teal-400 to-blue-400 rounded-xl bg-white/90 focus:ring-4 focus:ring-teal-400 focus:border-teal-500 transition-all duration-300 text-gray-800 placeholder-gray-500 shadow-sm"
+              aria-label={label}
+              whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(94, 234, 212, 0.5)" }}
+              whileHover={{ borderColor: "#3B82F6" }}
+            />
+          </div>
+        ))}
+
+        <div className="sm:col-span-2 flex items-center space-x-3 mt-4">
           <motion.input
             type="checkbox"
             name="family_history"
             checked={form.family_history}
             onChange={handleChange}
-            className="h-6 w-6 text-purple-600 rounded-xl border-2 border-purple-400 focus:ring-purple-400"
+            className="h-6 w-6 text-teal-600 rounded-xl border-2 border-teal-400 focus:ring-teal-400 bg-white/90"
             aria-label="Family History"
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.1, boxShadow: "0 0 8px rgba(94, 234, 212, 0.5)" }}
           />
-          <label className="text-lg font-semibold text-purple-700">
-            Family history of disease
+          <label className="font-bold text-teal-700 text-lg">
+            Family History
           </label>
         </div>
+      </div>
 
-        <motion.button
-          type="submit"
-          className="w-full py-4 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-bold text-lg rounded-xl shadow-lg hover:from-purple-600 hover:via-pink-600 hover:to-red-600 transition-all duration-300 border-2 border-purple-300"
-          whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(236, 72, 153, 0.5)" }}
-          whileTap={{ scale: 0.95 }}
-          aria-label="Submit Form"
-        >
-          Predict Risk! 🚀
-        </motion.button>
-      </form>
-    </motion.div>
+      <motion.button
+        type="submit"
+        className="w-full py-4 bg-gradient-to-r from-teal-500 to-blue-500 text-white font-bold text-lg rounded-2xl shadow-lg hover:from-teal-600 hover:to-blue-600 transition-all duration-300 border-2 border-teal-300 relative z-10"
+        whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(94, 234, 212, 0.7)" }}
+        whileTap={{ scale: 0.95 }}
+        aria-label="Submit Form"
+      >
+        Predict Risk! 🐠✨
+      </motion.button>
+    </motion.form>
   );
 }

@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+// pages/index.tsx
+
+import React, { useState, useCallback } from "react";
 import { NavTabs } from "../components/NavTabs";
 import FormInput from "../components/FormInput";
-import { PrescriptionInput } from "../components/PrescriptionInput";
+import { PrescriptionInput}  from "../components/PrescriptionInput";
 import { VisionInput } from "../components/VisionInput";
 import { RiskDashboard } from "../components/RiskDashboard";
 import type { PredictionResponse } from "../types";
@@ -11,9 +13,19 @@ export default function Home() {
   const [tab, setTab] = useState<"form" | "prescription" | "vision">("form");
   const [result, setResult] = useState<PredictionResponse | null>(null);
 
+  // Whenever the user switches tabs, clear out any existing result
+  const handleTabChange = useCallback(
+    (newTab: "form" | "prescription" | "vision") => {
+      setResult(null);
+      setTab(newTab);
+    },
+    []
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavTabs currentTab={tab} setTab={setTab} />
+      {/* pass our wrapped setter here instead of setTab directly */}
+      <NavTabs currentTab={tab} setTab={handleTabChange} />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         <motion.div
