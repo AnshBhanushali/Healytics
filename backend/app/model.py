@@ -23,5 +23,19 @@ def predict_form(data: FormInput, model_path: str) -> PredictionResponse:
         "Blood Pressure": "High" if data.systolic_bp>140 else "Normal",
         "Cholesterol Level": "High" if data.cholesterol>240 else "Normal"
     }])
+    
     proba = model.predict_proba(df)[0,1]
     pred = "high_risk" if proba >= 0.7 else ("medium_risk" if proba >= 0.4 else "low_risk")
+
+    factors = []
+    if data.systolic_bp > 140:    factors.append("high_systolic_bp")
+    if data.cholesterol > 240:     factors.append("high_cholesterol")
+    if data.family_history:        factors.append("family_history")
+    if not factors: factors = ["age_factor"]
+
+    return PredictionResponse(
+        mode="form",
+        prediction=pred,
+        confidence=round(float(proba), 3),
+        top_factors=factors[:2],
+    )
