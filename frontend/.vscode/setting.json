@@ -1,10 +1,13 @@
 {
-    "tailwindCSS.validate": true,
-    "tailwindCSS.emmetCompletions": true,
-    "files.associations": {
-      "*.css": "postcss"
-    },
-    "css.validate": false,
-    "css.lint.unknownAtRules": "ignore"
-  }
-  
+
+  "tailwindCSS.validate": true,
+  "tailwindCSS.emmetCompletions": true,
+
+  "files.associations": {
+    "*.css": "postcss"
+  },
+
+  "css.validate": false,
+
+  "css.lint.unknownAtRules": "ignore"
+}
