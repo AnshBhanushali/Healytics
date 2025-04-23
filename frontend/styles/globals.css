@@ -1,0 +1,8 @@
+/* styles/globals.css */
+
+/* Pull in Tailwind’s reset + base styles */
+@import "tailwindcss/preflight";
+/* Pull in Tailwind’s utility classes */
+@import "tailwindcss/utilities";
+
+/* NO other rules here—remove any @apply */

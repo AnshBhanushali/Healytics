@@ -14,3 +14,8 @@ class PredictionResponse(BaseModel):
     prediction: Literal["low_risk", "medium_risk", "high_risk"]
     confidence: float = Field(..., ge=0.0, le=1.0)
     top_factors: List[str]
+    description: str
+    recommended_actions: List[str]
+    urgency: Literal["low", "medium", "high"]
+    hospital_readmission: bool
+    readmission_probability: float
