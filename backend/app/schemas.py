@@ -8,8 +8,9 @@ class FormInput(BaseModel):
     cholesterol: float = Field(..., ge=50, le=400)
     family_history: bool
 
+
 class PredictionResponse(BaseModel):
-    mode: Literal["form"]
+    mode: Literal["form", "text-image", "vision"]
     prediction: Literal["low_risk", "medium_risk", "high_risk"]
     confidence: float = Field(..., ge=0.0, le=1.0)
     top_factors: List[str]

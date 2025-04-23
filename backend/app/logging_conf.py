@@ -1,3 +1,5 @@
+# app/logging_conf.py
+
 import logging
 import structlog
 from .config import settings
