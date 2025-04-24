@@ -1,13 +1,26 @@
-steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-    [
-      'build',
-      '--build-arg', 'NEXT_PUBLIC_API_URL=$_BACKEND_URL',
-      '-t', 'gcr.io/$PROJECT_ID/healytics-frontend:v1',
-      '.'
-    ]
-images:
-- 'gcr.io/$PROJECT_ID/healytics-frontend:v1'
+# frontend/cloudbuild.yaml
+
+# Allow loose substitutions so our _NEXT_PUBLIC_API_URL can be set inline
+options:
+  substitutionOption: ALLOW_LOOSE
+
+# Declare our custom substitutions
 substitutions:
-  _BACKEND_URL: ''
+  # you can override this on the CLI if you like
+  _NEXT_PUBLIC_API_URL: "https://healytics-backend-213826089274.us-central1.run.app"
+  _TAG: "v6"
+
+steps:
+  # Build the Docker image, injecting the API URL at build time
+  - name: gcr.io/cloud-builders/docker
+    args:
+      [
+        "build",
+        "--build-arg=NEXT_PUBLIC_API_URL=$_NEXT_PUBLIC_API_URL",
+        "-t", "gcr.io/$PROJECT_ID/healytics-frontend:$_TAG",
+        "."
+      ]
+
+# Tell Cloud Build to push this image
+images:
+  - "gcr.io/$PROJECT_ID/healytics-frontend:$_TAG"
