@@ -8,7 +8,7 @@ export interface FormInput {
   
   export interface PredictionResponse {
     mode: "form" | "text-image" | "vision";
-    prediction: "low_risk" | "medium_risk" | "high_risk";
+    prediction: "low_risk" | "medium_risk" | "high_risk" | "very_high_risk";
     confidence: number;
     top_factors: string[];
     description: string;
