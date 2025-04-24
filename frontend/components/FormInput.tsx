@@ -247,10 +247,19 @@ export default function FormInput({ onResult }: Props) {
         <FaFish className="text-3xl" />
       </motion.div>
 
-      <h2 className="text-4xl font-extrabold text-teal-800 flex items-center gap-3 z-10 relative">
-        <FaFish className="animate-bounce text-teal-500" />
-        Health Check Waves 🌊
-      </h2>
+      <h2
+  className="
+    relative
+    flex items-center justify-center gap-3
+    text-4xl font-extrabold text-teal-800
+    px-6 py-8      /* adds top/bottom space */
+    h-32           /* fixed height to accommodate the bounce */
+    z-10
+  "
+>
+  <FaFish className="animate-bounce text-teal-500 text-3xl" />
+  Health Check Waves 🌊
+</h2>
 
       {error && (
         <motion.div

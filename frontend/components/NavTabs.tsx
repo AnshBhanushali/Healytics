@@ -12,7 +12,6 @@ interface NavTabsProps {
 
 const tabs: { id: Tab; label: string; icon: ReactNode }[] = [
   { id: "form",         label: "Form Input",         icon: <FaClipboardList /> },
-  { id: "prescription", label: "Prescription Image", icon: <FaPrescriptionBottleAlt /> },
   { id: "vision",       label: "Symptom Photo",      icon: <FaCamera /> },
 ];
 
