@@ -1,9 +1,22 @@
+// components/FormInput.tsx
+
 import React, { useState } from "react";
 import api from "../utils/api";
 import type { PredictionResponse } from "../types";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { FaExclamationCircle, FaUserAlt, FaHeartbeat, FaTint, FaFish } from "react-icons/fa";
+
+// Explicitly type the structure of validation errors from the API
+interface ValidationErrorDetail {
+  loc: Array<string | number>;
+  msg: string;
+  type: string;
+}
+
+interface ValidationErrorResponse {
+  detail: ValidationErrorDetail[];
+}
 
 interface Props {
   onResult: (r: PredictionResponse) => void;
@@ -18,6 +31,9 @@ interface FormState {
 }
 
 export default function FormInput({ onResult }: Props) {
+  // Log the base API URL to verify environment variable
+  console.log("API URL is:", process.env.NEXT_PUBLIC_API_URL);
+
   const [form, setForm] = useState<FormState>({
     age: "",
     systolic_bp: "",
@@ -54,41 +70,42 @@ export default function FormInput({ onResult }: Props) {
     };
 
     try {
-      const { data } = await api.post<PredictionResponse>("/predict/form", payload);
+      const { data } = await api.post<PredictionResponse>('/predict/form', payload);
       onResult(data);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 422) {
-        const detail = (err.response.data as any).detail;
+        const data = err.response.data as ValidationErrorResponse;
+        const detail = data.detail;
         const msg =
           Array.isArray(detail) && detail.length
             ? `${detail[0].loc.slice(-1)[0]}: ${detail[0].msg}`
-            : "Invalid input.";
+            : 'Invalid input.';
         setError(msg);
       } else {
-        setError("Unexpected error. Please try again.");
+        setError('Unexpected error. Please try again.');
       }
     }
   };
 
-  // Define fields with their valid ranges
+  // Define input fields with their basic validation ranges
   const fields = [
-    { name: "age", label: "Age", icon: <FaUserAlt className="text-teal-500" />, min: 0, max: 120 },
-    { name: "systolic_bp", label: "Systolic BP", icon: <FaHeartbeat className="text-teal-500" />, min: 50, max: 250 },
-    { name: "diastolic_bp", label: "Diastolic BP", icon: <FaHeartbeat className="text-blue-500" />, min: 30, max: 150 },
-    { name: "cholesterol", label: "Cholesterol", icon: <FaTint className="text-blue-500" />, min: 50, max: 400 },
+    { name: 'age', label: 'Age', icon: <FaUserAlt className="text-teal-500" />, min: 0, max: 120 },
+    { name: 'systolic_bp', label: 'Systolic BP', icon: <FaHeartbeat className="text-teal-500" />, min: 50, max: 250 },
+    { name: 'diastolic_bp', label: 'Diastolic BP', icon: <FaHeartbeat className="text-blue-500" />, min: 30, max: 150 },
+    { name: 'cholesterol', label: 'Cholesterol', icon: <FaTint className="text-blue-500" />, min: 50, max: 400 },
   ];
 
-  // Bubble animation variants
+  // Animation variants for decorative bubbles
   const bubbleVariants = {
-    initial: { y: "100%", opacity: 0.3 },
+    initial: { y: '100%', opacity: 0.3 },
     animate: {
-      y: "-100%",
+      y: '-100%',
       opacity: 0.8,
       transition: {
         duration: Math.random() * 5 + 5,
         repeat: Infinity,
-        repeatType: "loop" as const,
-        ease: "linear",
+        repeatType: 'loop' as const,
+        ease: 'linear',
       },
     },
   };
@@ -96,13 +113,13 @@ export default function FormInput({ onResult }: Props) {
   return (
     <motion.form
       onSubmit={submit}
-      className="relative bg-gradient-to-br from-teal-100/80 to-blue-100/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 space-y-6 border-4 border-gradient-to-r from-teal-400 to-blue-400 max-w-2xl mx-auto overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
       aria-label="Health Prediction Form"
+      className="relative overflow-hidden"
     >
-      {/* Bubble Decorations */}
+      {/* Decorative bubbles */}
       {[...Array(8)].map((_, i) => (
         <motion.div
           key={i}
@@ -118,12 +135,12 @@ export default function FormInput({ onResult }: Props) {
         />
       ))}
 
-      {/* Fish Decoration */}
+      {/* Fish icon animation */}
       <motion.div
         className="absolute top-4 right-4 text-teal-500"
         initial={{ x: 20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 1, delay: 0.5, repeat: Infinity, repeatType: "reverse" }}
+        transition={{ duration: 1, delay: 0.5, repeat: Infinity, repeatType: 'reverse' }}
       >
         <FaFish className="text-3xl" />
       </motion.div>
@@ -138,7 +155,7 @@ export default function FormInput({ onResult }: Props) {
           className="flex items-center gap-2 text-red-700 bg-red-100 p-4 rounded-lg border-2 border-red-300 relative z-10 shadow-md"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, type: "spring" }}
+          transition={{ duration: 0.4, type: 'spring' }}
           role="alert"
         >
           <FaExclamationCircle className="text-xl" />
@@ -163,8 +180,8 @@ export default function FormInput({ onResult }: Props) {
               onChange={handleChange}
               className="w-full p-4 border-2 border-gradient-to-r from-teal-400 to-blue-400 rounded-xl bg-white/90 focus:ring-4 focus:ring-teal-400 focus:border-teal-500 transition-all duration-300 text-gray-800 placeholder-gray-500 shadow-sm"
               aria-label={label}
-              whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(94, 234, 212, 0.5)" }}
-              whileHover={{ borderColor: "#3B82F6" }}
+              whileFocus={{ scale: 1.02, boxShadow: '0 0 10px rgba(94, 234, 212, 0.5)' }}
+              whileHover={{ borderColor: '#3B82F6' }}
             />
           </div>
         ))}
@@ -177,18 +194,16 @@ export default function FormInput({ onResult }: Props) {
             onChange={handleChange}
             className="h-6 w-6 text-teal-600 rounded-xl border-2 border-teal-400 focus:ring-teal-400 bg-white/90"
             aria-label="Family History"
-            whileHover={{ scale: 1.1, boxShadow: "0 0 8px rgba(94, 234, 212, 0.5)" }}
+            whileHover={{ scale: 1.1, boxShadow: '0 0 8px rgba(94, 234, 212, 0.5)' }}
           />
-          <label className="font-bold text-teal-700 text-lg">
-            Family History
-          </label>
+          <label className="font-bold text-teal-700 text-lg">Family History</label>
         </div>
       </div>
 
       <motion.button
         type="submit"
         className="w-full py-4 bg-gradient-to-r from-teal-500 to-blue-500 text-white font-bold text-lg rounded-2xl shadow-lg hover:from-teal-600 hover:to-blue-600 transition-all duration-300 border-2 border-teal-300 relative z-10"
-        whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(94, 234, 212, 0.7)" }}
+        whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(94, 234, 212, 0.7)' }}
         whileTap={{ scale: 0.95 }}
         aria-label="Submit Form"
       >

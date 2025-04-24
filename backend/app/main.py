@@ -8,6 +8,7 @@ from .routers.form       import router as form_router
 from .routers.text_image import router as text_image_router
 from .routers.vision     import router as vision_router
 
+
 def create_app() -> FastAPI:
     configure_logging()
     app = FastAPI(
@@ -16,10 +17,13 @@ def create_app() -> FastAPI:
         description="Health risk API with form, text-image, and vision"
     )
 
-    # allow requests from your React frontend
+    # allow requests from your React frontend (local and production)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[ "http://localhost:3000" ], 
+        allow_origins=[
+            "http://localhost:3000",  # local development
+            "https://healytics-frontend-213826089274.us-central1.run.app"  # prod Cloud Run URL
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -31,7 +35,9 @@ def create_app() -> FastAPI:
 
     return app
 
+
 app = create_app()
+
 
 @app.get("/health", tags=["health"])
 async def health_check():
