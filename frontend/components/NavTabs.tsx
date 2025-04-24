@@ -1,7 +1,7 @@
 // components/NavTabs.tsx
 
 import React, { ReactNode } from "react";
-import { FaClipboardList, FaPrescriptionBottleAlt, FaCamera, FaHeartbeat } from "react-icons/fa";
+import { FaClipboardList, FaCamera, FaHeartbeat } from "react-icons/fa";
 
 export type Tab = "form" | "prescription" | "vision";
 
