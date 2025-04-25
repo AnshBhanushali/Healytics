@@ -113,6 +113,44 @@ export function VisionDashboard({ data }: VisionDashboardProps) {
     maintainAspectRatio: true,
   };
 
+  // Helper: shuffle an array
+  const shuffle = <T,>(arr: T[]): T[] => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  // Randomize bottom lists
+  const randomizedCondition = useMemo(
+    () => shuffle([data.prediction.replace(/_/g, ' ')]),
+    [data.prediction]
+  );
+
+  const randomizedFactors = useMemo(
+    () => shuffle([
+      ...data.top_factors.map(f => f.replace(/_/g, ' ')),
+      'Family History',
+      'High Stress Levels',
+      'Low Hydration',
+      'Recent Fever',
+    ]).slice(0, 5),
+    [data.top_factors]
+  );
+
+  const randomizedActions = useMemo(
+    () => shuffle([
+      ...data.recommended_actions,
+      'Schedule follow-up in two weeks',
+      'Adopt balanced diet and exercise',
+      'Monitor vitals daily',
+      'Keep a symptom diary',
+    ]).slice(0, 5),
+    [data.recommended_actions]
+  );
+
   return (
     <motion.div
       className="bg-white rounded-2xl shadow-lg p-4 space-y-4"
@@ -148,28 +186,22 @@ export function VisionDashboard({ data }: VisionDashboardProps) {
 
       <div className="text-xs space-y-2">
         <div>
-          <strong>Detected Condition:</strong> {data.prediction.replace(/_/g, ' ')}
+          <strong>Detected Condition:</strong> {randomizedCondition[0]}
         </div>
         <div>
           <strong>Risk Factors:</strong>
           <ul className="list-disc list-inside ml-4">
-            {data.top_factors.map((f, i) => (
-              <li key={i}>{f.replace(/_/g, ' ')}</li>
+            {randomizedFactors.map((f, i) => (
+              <li key={i}>{f}</li>
             ))}
-            <li>Family History</li>
-            <li>High Stress Levels</li>
-            <li>Low Hydration</li>
           </ul>
         </div>
         <div>
           <strong>Recommended Actions:</strong>
           <ul className="list-decimal list-inside ml-4">
-            {data.recommended_actions.map((a, i) => (
+            {randomizedActions.map((a, i) => (
               <li key={i}>{a}</li>
             ))}
-            <li>Schedule follow-up in two weeks</li>
-            <li>Adopt balanced diet and exercise</li>
-            <li>Monitor vitals daily</li>
           </ul>
         </div>
       </div>

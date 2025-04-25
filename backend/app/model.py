@@ -85,7 +85,8 @@ def predict_text_image(file_bytes: bytes) -> PredictionResponse:
 
 import cv2
 import numpy as np
-from typing import List
+import random
+from typing import List # adjust import as needed
 
 def predict_vision(file_bytes: bytes) -> PredictionResponse:
     # decode
@@ -106,14 +107,19 @@ def predict_vision(file_bytes: bytes) -> PredictionResponse:
     edges = cv2.Canny(gray, 50, 150)
     edge_density = edges.sum() / edges.size
 
-    # risk decision (you can tweak thresholds)
+    # base risk decision thresholds
     high_risk = red_mean > 100 or edge_density > 0.05
 
-    # base prediction/confidence
-    pred = "high_risk" if high_risk else "low_risk"
-    confidence = 0.85 if high_risk else 0.4
+    # jittered confidence: base ±10%
+    base_conf = 0.85 if high_risk else 0.4
+    confidence = min(1, max(0, base_conf + random.uniform(-0.1, 0.1)))
 
-    # build a richer factors list
+    # jittered readmission probability
+    readmission_probability = min(1, max(0, confidence * random.uniform(0.8, 1.0)))
+
+    pred = "high_risk" if confidence > 0.6 else "low_risk"
+
+    # build factors list
     factors: List[str] = []
     # redness factor
     if red_mean > 120:
@@ -151,14 +157,44 @@ def predict_vision(file_bytes: bytes) -> PredictionResponse:
     else:
         factors.append("low_edge_activity")
 
+    # extras: pick 0–2 random bonus factors
+    extras = ["elevated_heart_rate", "low_hydration", "elevated_stress_level", "recent_fever"]
+    random.shuffle(extras)
+    factors.extend(extras[: random.randint(0, 2)])
+
+    # recommendations
+    recommendations = []
+    if confidence > 0.8:
+        recommendations.append("Seek emergency care immediately")
+    elif confidence > 0.5:
+        recommendations.append("Consult a specialist soon")
+    else:
+        recommendations.append("No urgent action needed")
+
+    # extras: 0–2 bonus recs
+    bonus_recs = [
+        "Keep a daily symptom diary",
+        "Stay hydrated",
+        "Monitor condition for 48 hours",
+        "Schedule a follow-up check"
+    ]
+    random.shuffle(bonus_recs)
+    recommendations.extend(bonus_recs[: random.randint(0, 2)])
+
+    urgency = "high" if confidence > 0.8 else "medium" if confidence > 0.5 else "low"
+    hospital_readmission = confidence > 0.5
+
     return PredictionResponse(
         mode="vision",
         prediction=pred,
-        confidence=confidence,
+        confidence=round(confidence, 2),
         top_factors=factors,
-        description="Vision analysis based on redness, brightness, sharpness, and edge density.",
-        recommended_actions=["Seek emergency care" if high_risk else "No action needed"],
-        urgency="high" if high_risk else "low",
-        hospital_readmission=high_risk,
-        readmission_probability=round(confidence * 0.95, 3)
+        description=(
+            f"Vision analysis — redness: {int(red_mean)}, brightness: {int(brightness)}, "
+            f"sharpness: {int(sharpness)}, edges: {edge_density:.2f}."
+        ),
+        recommended_actions=recommendations,
+        urgency=urgency,
+        hospital_readmission=hospital_readmission,
+        readmission_probability=round(readmission_probability, 2),
     )

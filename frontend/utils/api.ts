@@ -1,18 +1,16 @@
-// utils/api.ts
-import axios, { AxiosInstance } from 'axios';
+import axios from 'axios';
 
-const defaultBaseURL =
-  typeof window !== 'undefined'
-    ? window.location.origin
-    : '';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+if (!BASE_URL) {
+  throw new Error(
+    'Missing NEXT_PUBLIC_API_URL in .env.local — check that file exists and you restarted the dev server'
+  );
+}
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || defaultBaseURL;
+console.log('[utils/api] ➜ using baseURL:', BASE_URL);
 
-// <-- add this
-console.log('[utils/api] ➜ using baseURL:', API_BASE_URL);
-
-const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+const api = axios.create({
+  baseURL: BASE_URL,
   headers: { Accept: 'application/json' },
 });
 
